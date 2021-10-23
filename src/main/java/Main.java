@@ -20,9 +20,12 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class Main {
 
-    private static final String path = "/Users/jirenhe/data/input.data";
+    private static final String prefix = "/Users/jirenhe";
+    //private static final String prefix = "";
 
-    private static final String out_path = "/Users/jirenhe/data/result/output.data";
+    private static final String path = prefix + "/data/input.data";
+
+    private static final String out_path = prefix + "/data/result/output.data";
 
     private static final int threadNum = Runtime.getRuntime().availableProcessors() + 2;
 
@@ -154,52 +157,44 @@ public class Main {
                 }
                 file.seek(acStart);
                 System.out.printf("thread : %s acstart : %s acend : %s%n", no, acStart, acEnd);
-                long startTime = System.currentTimeMillis();
                 MappedByteBuffer buffer = channel.map(MapMode.READ_ONLY, acStart, acEnd - acStart);
                 buffer.load();
-                StringBuilder input = new StringBuilder();
-                byte[] bytes = new byte[buffer.remaining()];
-                buffer.get(bytes);
-                System.out.println("io take time : " + (System.currentTimeMillis() - startTime));
-                startTime = System.currentTimeMillis();
-                int length = bytes.length;
-                for (int i = 0; i < length; i++) {
-                    byte b = bytes[i];
+                char[] chars = new char[64];
+                int length = 0;
+                while (buffer.hasRemaining()) {
+                    int b = buffer.get();
                     switch (b) {
                         case -1:
                         case '\n':
-                            dealLine(result, input.toString());
-                            input = new StringBuilder();
+                            dealLine(result, chars, length);
+                            length = 0;
                             break;
                         case '\r':
-                            int cur = i;
-                            if (i != (length - 1) && bytes[++cur] == '\n') {
-                                i++;
+                            int cur = buffer.position();
+                            if (buffer.hasRemaining() && (buffer.get()) != '\n') {
+                                buffer.position(cur);
+                            } else {
+                                dealLine(result, chars, length);
+                                length = 0;
                             }
-                            dealLine(result, input.toString());
-                            input = new StringBuilder();
                             break;
                         default:
-                            input.append((char)b);
+                            chars[length++] = (char)b;
                             break;
                     }
-                }
-                System.out.println("caculate take time : " + (System.currentTimeMillis() - startTime));
-                if (input.length() > 0) {
-                    dealLine(result, input.toString());
                 }
             } catch (Exception e) {
                 throw new RuntimeException("thread " + no + " has error", e);
             }
+            System.out.printf("thread %s result size %s totalBytes %s \n", no, result.size(), totalBytes);
             return new PieceResult(totalBytes, result);
         }
 
-        private void dealLine(List<Integer> result, String line) {
-            int number = LineMatcher.match(line);
+        private void dealLine(List<Integer> result, char[] chars, int length) {
+            int number = LineMatcher.match(chars, length);
             if (number != -1 && PrimeCheck.isPrime(number)) {
-                String str = number + "";
                 result.add(number);
-                totalBytes += str.length() + 1;
+                totalBytes += length + 1;
             }
         }
 

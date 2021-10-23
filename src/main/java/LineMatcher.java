@@ -4,17 +4,21 @@
  */
 public class LineMatcher {
 
-    private final String pattern = "shulie_1024:";
+    public static int match(char[] chars, int length) {
+        if (length < 13) {
+            return -1;
+        }
+        int result = 0;
+        for (int i = 12; i < length; i++) {
+            int digit = Character.digit(chars[i], 10);
+            result *= 10;
+            result += digit;
+        }
+        return result;
+    }
 
-    public static int match(String line) {
-        if (line.length() < 13) {
-            return -1;
-        }
-        String str = line.substring(12);
-        try {
-            return Integer.parseInt(str);
-        } catch (NumberFormatException e) {
-            return -1;
-        }
+    public static void main(String[] args) {
+        char[] chars = "shulie_1024:9994".toCharArray();
+        System.out.println(match(chars, 16));
     }
 }
