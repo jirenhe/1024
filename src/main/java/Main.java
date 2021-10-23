@@ -194,7 +194,7 @@ public class Main {
             int number = LineMatcher.match(chars, length);
             if (number != -1 && PrimeCheck.isPrime(number)) {
                 result.add(number);
-                totalBytes += length + 1;
+                totalBytes += length - 11;
             }
         }
 
