@@ -4,9 +4,16 @@
  */
 public class LineMatcher {
 
+    private static final char[] pattern = "shulie_1024:".toCharArray();
+
     public static int match(char[] chars, int length) {
         if (length < 13) {
             return -1;
+        }
+        for (int i = 0; i < 12; i++) {
+            if (chars[i] != pattern[i]) {
+                return -1;
+            }
         }
         int result = 0;
         for (int i = 12; i < length; i++) {

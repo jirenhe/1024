@@ -186,7 +186,6 @@ public class Main {
             } catch (Exception e) {
                 throw new RuntimeException("thread " + no + " has error", e);
             }
-            System.out.printf("thread %s result size %s totalBytes %s \n", no, result.size(), totalBytes);
             return new PieceResult(totalBytes, result);
         }
 
